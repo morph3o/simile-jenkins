@@ -41,10 +41,10 @@
   <f:entry title="Git Repository" field="repository">
     <f:textbox />
   </f:entry>
-  <f:entry title="branch" field="branch">
+  <f:entry title="Branch" field="branch">
     <f:textbox />
   </f:entry>
-  <f:entry title="email" field="email">
+  <f:entry title="Email" field="email">
     <f:textbox />
   </f:entry>
 </j:jelly>

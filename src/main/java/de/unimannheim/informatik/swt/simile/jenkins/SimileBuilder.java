@@ -26,7 +26,7 @@
  *
  */
 
-package org.jenkinsci.plugins.org.jenkinsci;
+package de.unimannheim.informatik.swt.simile.jenkins;
 
 import com.google.common.base.Strings;
 import com.mashape.unirest.http.HttpResponse;
