@@ -28,5 +28,10 @@
   -->
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-
+    <f:section title="Simile Plugin">
+        <f:entry title="Simile Endpoint" field="simileUrl"
+                 description="This is the URL where Simile is deployed">
+            <f:textbox default="http://localhost:8080/simile" />
+        </f:entry>
+    </f:section>
 </j:jelly>

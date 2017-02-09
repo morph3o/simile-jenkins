@@ -43,8 +43,11 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import jenkins.tasks.SimpleBuildStep;
+import net.sf.json.JSONObject;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -52,7 +55,7 @@ import java.util.regex.Pattern;
 
 public class SimileBuilder extends Builder implements SimpleBuildStep {
 
-    private static final String SIMILE_URL = "http://simile.herokuapp.com/repository";
+    private String SIMILE_URL = getSimilerServerUrl() + "/repository";
 
     private final String repository;
     private final String branch;
@@ -87,8 +90,11 @@ public class SimileBuilder extends Builder implements SimpleBuildStep {
             listener.getLogger().println("Simile Jenkins Plugin");
             listener.getLogger().println(Strings.repeat("=", "Simile Jenkins Plugin".length()));
             listener.getLogger().println("Sending data to Simile for component search.");
+            listener.getLogger().println(String.format("Simile Endpoint: %s", SIMILE_URL));
 
             HttpResponse<JsonNode> response = Unirest.post(SIMILE_URL)
+                    .header("accept", "application/json")
+                    .header("Content-Type", "application/json")
                     .queryString("repo", this.repository)
                     .queryString("branch", this.branch)
                     .queryString("email", this.email)
@@ -103,12 +109,18 @@ public class SimileBuilder extends Builder implements SimpleBuildStep {
             }
         } catch (UnirestException e) {
             listener.getLogger().println("An error happened when sending data to Simile.");
+            listener.getLogger().println(e.getMessage());
+            listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
         }
     }
 
-    // Overridden for better type safety.
-    // If your plugin doesn't really define any property on Descriptor,
-    // you don't have to do this.
+    private String getSimilerServerUrl() {
+        if (Strings.isNullOrEmpty(getDescriptor().getSimileUrl()))
+            return "http://localhost:8080/simile";
+        else
+            return getDescriptor().getSimileUrl();
+    }
+
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl)super.getDescriptor();
@@ -124,6 +136,9 @@ public class SimileBuilder extends Builder implements SimpleBuildStep {
      */
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
+
+        private String simileUrl;
+
         /**
          * In order to load the persisted global configuration, you have to 
          * call load() in the constructor.
@@ -165,6 +180,15 @@ public class SimileBuilder extends Builder implements SimpleBuildStep {
             return true;
         }
 
+        @Override
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+            // To persist global configuration information,
+            // set that to properties and call save().
+            this.simileUrl = formData.getString("simileUrl");
+            save();
+            return super.configure(req, formData);
+        }
+
         /**
          * This human readable gitRepository is used in the configuration screen.
          */
@@ -195,6 +219,10 @@ public class SimileBuilder extends Builder implements SimpleBuildStep {
         private boolean isValidGithubWebURL(String gitRepo) {
             final Pattern pattern = Pattern.compile("(http(s)?)(:(//)?)([\\w\\.@\\:/\\-~]+)(\\.git)?");
             return pattern.matcher(gitRepo).matches();
+        }
+
+        public String getSimileUrl() {
+            return this.simileUrl;
         }
     }
 }
