@@ -61,7 +61,6 @@ public class SimileBuilder extends Builder implements SimpleBuildStep {
     private final String branch;
     private final String email;
 
-    // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public SimileBuilder(String repository, String branch, String email) {
         this.repository = repository;
@@ -69,9 +68,6 @@ public class SimileBuilder extends Builder implements SimpleBuildStep {
         this.email = email;
     }
 
-    /**
-     * We'll use this from the {@code config.jelly}.
-     */
     public String getRepository() {
         return this.repository;
     }
@@ -129,10 +125,6 @@ public class SimileBuilder extends Builder implements SimpleBuildStep {
     /**
      * Descriptor for {@link SimileBuilder}. Used as a singleton.
      * The class is marked as public so that it can be accessed from views.
-     *
-     * <p>
-     * See {@code src/main/resources/hudson/plugins/hello_world/SimileBuilder/*.jelly}
-     * for the actual HTML fragment for the configuration screen.
      */
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
@@ -176,7 +168,6 @@ public class SimileBuilder extends Builder implements SimpleBuildStep {
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-            // Indicates that this builder can be used with all kinds of project types 
             return true;
         }
 
